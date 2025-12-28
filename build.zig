@@ -14,7 +14,11 @@ pub fn build(b: *std.Build) void {
         },
     });
     // NOTE: Debug mode does not work as it crashes in creating the log file
-    const optimize = b.standardOptimizeOption(.{ .preferred_optimize_mode = .ReleaseSafe });
+    const optimize_internal = b.standardOptimizeOption(.{});
+    const optimize = switch(optimize_internal) {
+        .Debug => .ReleaseSafe,
+        else => optimize_internal,
+    };
  
     // Dependencies
     const win32 = b.dependency("zigwin32", .{}).module("win32");
