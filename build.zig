@@ -25,7 +25,7 @@ pub fn build(b: *std.Build) !void {
     const minhook = minhookDependency(b, target, optimize);
 
     const dll = b.addLibrary(.{
-        .name = "zig-dll",
+        .name = "chrono_trigger",
         .linkage = .dynamic,
         .root_module = b.createModule(.{
             .root_source_file = b.path("src/dll.zig"),
@@ -43,7 +43,7 @@ pub fn build(b: *std.Build) !void {
     const install_step = b.step("dll-install", "Install the dynamic library to game executable path");
     if (game_path_opt) |game_path| {
         const path = try std.fmt.allocPrint(b.allocator, "{s}//version.dll", .{game_path});
-        const install_command = CopyFile.create(b, b.path("zig-out/bin/zig-dll.dll"), path);
+        const install_command = CopyFile.create(b, dll.getEmittedBin(), path);
         install_command.step.dependOn(b.getInstallStep());
         install_step.dependOn(&install_command.step);
     } else {
