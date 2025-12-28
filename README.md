@@ -1,9 +1,6 @@
 # Chrono Trigger POC with Zig
 
-For steam linux requires to put as launch options:
-```sh
-WINEDLLOVERRIDES="version=n,b" %command%
-```
+This is just a POC in Zig to see how feasible are dynamic library injections on games
 
 ## Local development
 
@@ -24,3 +21,8 @@ zig build run -Dgame-path=/absolute/path/to/game/install/path
 ```
 
 NOTE: Tested only on Linux
+
+For steam linux requires to put as launch options:
+```sh
+WINEDLLOVERRIDES="version=n,b" %command%
+```
