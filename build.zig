@@ -42,7 +42,7 @@ pub fn build(b: *std.Build) !void {
     const game_path_opt = b.option([]const u8, "game-path", "Game installation absolute path");
     const install_step = b.step("dll-install", "Install the dynamic library to game executable path");
     if (game_path_opt) |game_path| {
-        const path = try std.fmt.allocPrint(b.allocator, "{s}//version.dll", .{game_path});
+        const path = try std.fs.path.join(b.allocator, &.{game_path, "version.dll"});
         const install_command = CopyFile.create(b, dll.getEmittedBin(), path);
         install_command.step.dependOn(b.getInstallStep());
         install_step.dependOn(&install_command.step);
