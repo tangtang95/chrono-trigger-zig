@@ -23,12 +23,8 @@ pub fn DllMain(
     switch (forward_reason) {
         w32.DLL_PROCESS_ATTACH => {
             attach() catch |err| {
-                var buffer: [sdk.MAX_PATH:0]u8 = undefined;
-                _ = std.fmt.bufPrintZ(&buffer, "Error: {any}", .{err}) catch {
-                    return 0;
-                };
-                _ = w32.MessageBoxA(null, &buffer, "Chrono Trigger error", w32.MB_ICONERROR);
                 std.log.err("Failed to attach dll: {any}", .{err});
+                _ = w32.MessageBoxA(null, "Game crashed due to failed dll attach. Check log file for more data.", "Chrono Trigger crash", w32.MB_ICONERROR);
                 return 0;
             };
             std.log.info("ChronoTrigger dll attached successfully!", .{});
