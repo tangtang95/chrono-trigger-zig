@@ -53,12 +53,12 @@ export fn VerQueryValueW(
     return __VerQueryValueW(block, subBlock, buffer, len);
 }
 
-var __GetFileVersionInfoA: *const fn (win.LPCSTR, win.DWORD, win.DWORD, win.LPVOID) callconv(.c) win.BOOL = undefined;
-var __GetFileVersionInfoW: *const fn (win.LPCWSTR, win.DWORD, win.DWORD, win.LPVOID) callconv(.c) win.BOOL = undefined;
-var __GetFileVersionInfoSizeA: *const fn (win.LPCSTR, *win.DWORD) callconv(.c) win.DWORD = undefined;
-var __GetFileVersionInfoSizeW: *const fn (win.LPCWSTR, *win.DWORD) callconv(.c) win.DWORD = undefined;
-var __VerQueryValueA: *const fn (win.LPCVOID, win.LPCSTR, *win.LPVOID, *win.UINT) callconv(.c) win.BOOL = undefined;
-var __VerQueryValueW: *const fn (win.LPCVOID, win.LPCWSTR, *win.LPVOID, *win.UINT) callconv(.c) win.BOOL = undefined;
+var __GetFileVersionInfoA: *const @TypeOf(GetFileVersionInfoA) = undefined;
+var __GetFileVersionInfoW: *const @TypeOf(GetFileVersionInfoW) = undefined;
+var __GetFileVersionInfoSizeA: *const @TypeOf(GetFileVersionInfoSizeA) = undefined;
+var __GetFileVersionInfoSizeW: *const @TypeOf(GetFileVersionInfoSizeW) = undefined;
+var __VerQueryValueA: *const @TypeOf(VerQueryValueA) = undefined;
+var __VerQueryValueW: *const @TypeOf(VerQueryValueW) = undefined;
 
 pub fn loadVersionLib() !void {
     var systemPath: [sdk.MAX_PATH:0]u8 = undefined;
