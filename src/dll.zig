@@ -1,7 +1,7 @@
 const std = @import("std");
 const win = std.os.windows;
 const w32 = @import("win32").everything;
-const minhook = @import("minhook");
+const hooking = @import("hooking.zig");
 const version = @import("version.zig");
 const sdk = @import("sdk.zig");
 
@@ -35,8 +35,11 @@ pub fn DllMain(
             return 1;
         },
         w32.DLL_PROCESS_DETACH => {
+            detach() catch |err| {
+                std.log.err("Failed to detach dll: {any}", .{err});
+                return 0;
+            };
             std.log.info("ChronoTrigger dll detached successfully!", .{});
-            detach();
             return 1;
         },
         else => return 0,
@@ -46,9 +49,17 @@ pub fn DllMain(
 fn attach() !void {
     try startFileLogging();
     try version.loadVersionLib();
+    try hooking.hooking.init();
+    const base_module_opt = w32.GetModuleHandleA(null);
+    if (base_module_opt) |base_module| {
+        const base_module_int = @intFromPtr(base_module);
+        hooks.win_main_hook = try .create(@ptrFromInt(base_module_int + 0x2D8830), win_main);
+        try hooks.win_main_hook.enable();
+    }
 }
 
-fn detach() void {
+fn detach() !void {
+    try hooking.hooking.deinit();
     FileLogger.deinit();
 }
 
@@ -58,4 +69,18 @@ fn startFileLogging() !void {
     var pathBuffer: [sdk.MAX_PATH]u8 = undefined;
     const path = try std.fmt.bufPrint(&pathBuffer, "{s}\\{s}", .{currDirBuffer[0..len], log_file_name});
     try FileLogger.init(path);
+}
+
+const hooks = struct {
+    var win_main_hook: hooking.Hook(@TypeOf(win_main)) = undefined;
+};
+
+fn win_main(
+    h_instance: win.HINSTANCE,
+    h_prev_instance: win.HINSTANCE,
+    cmd_line: win.PCWSTR,
+    num_show_cmd: i32
+) callconv(.c) i32 {
+    std.log.info("executing custom WinMain function", .{});
+    return hooks.win_main_hook.original(h_instance, h_prev_instance, cmd_line, num_show_cmd);
 }
