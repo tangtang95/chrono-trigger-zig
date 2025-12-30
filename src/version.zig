@@ -74,7 +74,6 @@ pub fn loadVersionLib() !void {
     var versionWPath: [sdk.MAX_PATH:0]u16 = undefined;
     const versionWPathLen = try std.unicode.wtf8ToWtf16Le(&versionWPath, versionPath);
     versionWPath[versionWPathLen] = 0;
-    versionWPath[versionWPathLen+1] = 0;
 
     const module = win32.LoadLibraryW(&versionWPath);
     if (module == null) {
