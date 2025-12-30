@@ -46,7 +46,7 @@ fn attach() !void {
     try startFileLogging();
     try version.loadVersionLib();
     try hooking.hooking.init();
-    const base_module_opt = w32.GetModuleHandleA(null);
+    const base_module_opt = w32.GetModuleHandleW(null);
     if (base_module_opt) |base_module| {
         const base_module_int = @intFromPtr(base_module);
         hooks.win_main_hook = try .create(@ptrFromInt(base_module_int + 0x2D8830), win_main);
@@ -61,7 +61,9 @@ fn detach() !void {
 
 fn startFileLogging() !void {
     var currDirBuffer: [sdk.MAX_PATH:0]u8 = undefined;
-    const len = w32.GetCurrentDirectoryA(sdk.MAX_PATH, &currDirBuffer);
+    var currDirWBuffer: [sdk.MAX_PATH:0]u16 = undefined;
+    const wLen = w32.GetCurrentDirectoryW(sdk.MAX_PATH, &currDirWBuffer);
+    const len = try std.unicode.utf16LeToUtf8(&currDirBuffer, currDirWBuffer[0..wLen]);
     var pathBuffer: [sdk.MAX_PATH]u8 = undefined;
     const path = try std.fmt.bufPrint(&pathBuffer, "{s}\\{s}", .{currDirBuffer[0..len], log_file_name});
     try FileLogger.init(path);

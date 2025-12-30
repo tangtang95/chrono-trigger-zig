@@ -61,14 +61,22 @@ var __VerQueryValueA: *const @TypeOf(VerQueryValueA) = undefined;
 var __VerQueryValueW: *const @TypeOf(VerQueryValueW) = undefined;
 
 pub fn loadVersionLib() !void {
-    var systemPath: [sdk.MAX_PATH:0]u8 = undefined;
-    const systemPathLen = win32.GetSystemDirectoryA(&systemPath, sdk.MAX_PATH);
+    var systemWPath: [sdk.MAX_PATH:0]u16 = undefined;
+    const systemWPathLen = win32.GetSystemDirectoryW(&systemWPath, sdk.MAX_PATH);
 
-    var versionPath: [sdk.MAX_PATH:0]u8 = undefined;
-    _ = try std.fmt.bufPrintZ(&versionPath, "{s}\\version.dll", .{systemPath[0..systemPathLen]});
-    std.log.debug("loading version library: {s}", .{@as([*:0]const u8, &versionPath)});
+    var systemPath: [sdk.MAX_PATH]u8 = undefined;
+    const systemPathLen = std.unicode.wtf16LeToWtf8(&systemPath, systemWPath[0..systemWPathLen]);
 
-    const module = win32.LoadLibraryA(&versionPath);
+    var versionPathBuffer: [sdk.MAX_PATH]u8 = undefined;
+    const versionPath = try std.fmt.bufPrint(&versionPathBuffer, "{s}\\version.dll", .{systemPath[0..systemPathLen]});
+    std.log.debug("loading version library: {s}", .{versionPath});
+
+    var versionWPath: [sdk.MAX_PATH:0]u16 = undefined;
+    const versionWPathLen = try std.unicode.wtf8ToWtf16Le(&versionWPath, versionPath);
+    versionWPath[versionWPathLen] = 0;
+    versionWPath[versionWPathLen+1] = 0;
+
+    const module = win32.LoadLibraryW(&versionWPath);
     if (module == null) {
         return error.VersionLibraryNotFound;
     }
